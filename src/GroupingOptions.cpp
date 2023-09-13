@@ -1,4 +1,5 @@
 #include <GroupingOptions.h>
+#include <ReadWrite.h>
 #include <iostream>
 
 double calculateDistance(const Object* obj1, const Object* obj2)
@@ -16,25 +17,28 @@ bool compareByDistance(const Object* obj1, const Object* obj2)
     return distance1 < distance2;
 }
 
-std::map<std::wstring, std::vector<Object*>> groupingByDistance(std::vector<Object> &objects)
+std::map<std::wstring, std::vector<Object*>> groupingByDistance(std::vector<Object*> &objects)
 {
     std::map<std::wstring, std::vector<Object*>> resultGroups;
 
-    auto* zeroPoint = new Object(L"НулеваяКоордината", 0.0, 0.0, L"Точка", 0);
+    auto* zeroPoint = new Object(ConvertToWString("НулеваяКоордината"),
+                                 0.0, 0.0, ConvertToWString("Точка"), 0);
 
+    setlocale(LC_ALL,"Russian");
     for (auto obj : objects)
     {
-        std::wstring groupName;
-        double objDistance = calculateDistance(&obj, zeroPoint);
+        std::string groupName;
+        double objDistance = calculateDistance(obj, zeroPoint);
         if (objDistance < 100.0)
-            groupName = L"До 100 ед.";
+            groupName = "До 100 ед.";
         else if (objDistance < 1000.0)
-            groupName = L"До 1000 ед.";
+            groupName = "До 1000 ед.";
         else if (objDistance < 10000.0)
-            groupName = L"До 10000 ед.";
+            groupName = "До 10000 ед.";
         else
-            groupName = L"Слишком далеко";
-        resultGroups[groupName].push_back(&obj);
+            groupName = "Слишком далеко";
+        auto wGroupName = ConvertToWString(groupName);
+        resultGroups[wGroupName].push_back(obj);
     }
 
     for (auto group : resultGroups)
@@ -45,29 +49,26 @@ std::map<std::wstring, std::vector<Object*>> groupingByDistance(std::vector<Obje
     return resultGroups;
 }
 
-std::map<std::wstring, std::vector<Object*>> groupingByName(std::vector<Object> &objects)
+std::map<std::wstring, std::vector<Object*>> groupingByName(std::vector<Object*> &objects)
 {
     std::map<std::wstring, std::vector<Object*>> resultGroups;
 
-    auto isCyrillic = [](char symbol)
+    setlocale( LC_ALL,"Russian" );
+    auto isCyrillic = [](const wchar_t &symbol)
     {
-        std::string cyrillicChars = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
-        for (auto ch: cyrillicChars)
-            if (symbol == ch)
-                return true;
-        return false;
+        return symbol >= L'\u0410' && symbol <= L'\u044F';
     };
 
     for (auto obj : objects)
     {
-        std::wstring name = obj.getName();
+        std::wstring name = obj->getName();
         if (!name.empty())
         {
-            char firstChar = name[0];
+            wchar_t firstChar = name[0];
             if (!isCyrillic(firstChar))
                 firstChar = '#';
-            std::wstring groupName = std::wstring(1, firstChar);
-            resultGroups[groupName].push_back(&obj);
+            auto groupName = std::wstring(1, firstChar);
+            resultGroups[groupName].push_back(obj);
         }
     }
 
@@ -82,31 +83,32 @@ std::map<std::wstring, std::vector<Object*>> groupingByName(std::vector<Object> 
     return resultGroups;
 }
 
-std::map<std::wstring, std::vector<Object*>> groupingByCreationTime(std::vector<Object> &objects)
+std::map<std::wstring, std::vector<Object*>> groupingByCreationTime(std::vector<Object*> &objects)
 {
     std::map<std::wstring, std::vector<Object*>> resultGroups;
 
     for (auto obj : objects)
     {
         time_t currentTime = std::time(nullptr);
-        time_t objTime = obj.getCreationTime();
+        time_t objTime = obj->getCreationTime();
         double diffDays = std::difftime(currentTime, objTime) / (60 * 60 * 24);
 
-        std::wstring groupName;
+        std::string groupName;
         if (diffDays < 1)
-            groupName = L"Сегодня";
+            groupName = "Сегодня";
         else if (diffDays < 2)
-            groupName = L"Вчера";
+            groupName = "Вчера";
         else if (diffDays < 7)
-            groupName = L"На этой неделе";
+            groupName = "На этой неделе";
         else if (diffDays < 30)
-            groupName = L"В этом месяце";
+            groupName = "В этом месяце";
         else if (diffDays < 365)
-            groupName = L"В этом году";
+            groupName = "В этом году";
         else
-            groupName = L"Ранее";
+            groupName = "Ранее";
+        auto wGroupName = ConvertToWString(groupName);
 
-        resultGroups[groupName].push_back(&obj);
+        resultGroups[wGroupName].push_back(obj);
     }
 
     for (auto group : resultGroups)
@@ -120,12 +122,13 @@ std::map<std::wstring, std::vector<Object*>> groupingByCreationTime(std::vector<
     return resultGroups;
 }
 
-std::map<std::wstring, std::vector<Object*>> groupingByObjectType(std::vector<Object> &objects)
+std::map<std::wstring, std::vector<Object*>> groupingByObjectType(std::vector<Object*> &objects)
 {
     std::map<std::wstring, std::vector<Object*>> resultGroups;
 
+    setlocale( LC_ALL,"Russian" );
     for (auto obj : objects)
-        resultGroups[obj.getObjectType()].push_back(&obj);
+        resultGroups[obj->getObjectType()].push_back(obj);
 
     std::vector<Object*> miscellaneous;
     std::vector<std::wstring> objectTypes;
@@ -145,7 +148,11 @@ std::map<std::wstring, std::vector<Object*>> groupingByObjectType(std::vector<Ob
     }
 
     if (!miscellaneous.empty())
-        resultGroups[L"Разное"] = miscellaneous;
+    {
+        std::wstring groupName = ConvertToWString("Разное");
+        resultGroups[groupName] = miscellaneous;
+    }
+
 
     for (auto group : resultGroups)
     {
