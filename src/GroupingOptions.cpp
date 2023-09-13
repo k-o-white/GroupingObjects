@@ -71,6 +71,14 @@ std::map<std::wstring, std::vector<Object*>> groupingByName(std::vector<Object> 
         }
     }
 
+    for (auto group : resultGroups)
+    {
+        std::sort(group.second.begin(), group.second.end(), [](const Object* obj1, const Object* obj2)
+        {
+            return obj1->getName() < obj2->getName();
+        });
+    }
+
     return resultGroups;
 }
 
@@ -116,7 +124,6 @@ std::map<std::wstring, std::vector<Object*>> groupingByObjectType(std::vector<Ob
 {
     std::map<std::wstring, std::vector<Object*>> resultGroups;
 
-    // Группировка по типу
     for (auto obj : objects)
         resultGroups[obj.getObjectType()].push_back(&obj);
 
