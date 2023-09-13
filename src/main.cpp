@@ -7,7 +7,7 @@ enum option {DISTANCE = 1, NAME, CREATION_TIME, OBJECT_TYPE};
 
 int main() 
 {
-    auto objects = readFromFile("..\\resources\\data.txt");
+    auto objects = getObjectList("..\\resources\\data.txt");
     std::map<std::wstring, std::vector<Object*>> result;
     int option;
     std::cout << "Choose option to group objects: ";
