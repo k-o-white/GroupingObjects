@@ -26,9 +26,9 @@ public:
 
 std::wstring ConvertToWString(const std::string &source);
 
-std::stringstream ReadFromFile(std::string path);
+std::stringstream ReadFromFile(const std::string& path);
 
-std::vector<Object> getObjectList(std::string filePath);
+std::vector<Object*> getObjectList(const std::string& filePath);
 
-void writeToFile(std::map<std::wstring, std::vector<Object*>> &groups);
+void writeToFile(std::map<std::wstring, std::vector<Object*>> &groups, std::string &fileName);
 

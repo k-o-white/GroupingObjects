@@ -23,7 +23,7 @@ std::wstring ConvertToWString(const std::string &source)
     return wstr;
 }
 
-std::stringstream ReadFromFile(std::string path)
+std::stringstream ReadFromFile(const std::string& path)
 {
     std::ifstream f(path);
     if (!f.is_open())
@@ -35,9 +35,9 @@ std::stringstream ReadFromFile(std::string path)
     return ss;
 }
 
-std::vector<Object> getObjectList(std::string filePath)
+std::vector<Object*> getObjectList(const std::string& filePath)
 {
-    std::vector<Object> objs;
+    std::vector<Object*> objs;
     std::stringstream fileContent;
     fileContent = ReadFromFile(filePath);
     std::string line;
@@ -49,37 +49,39 @@ std::vector<Object> getObjectList(std::string filePath)
         double x, y;
         time_t creationTime;
         iss >> name >> x >> y >> objectType >> creationTime;
-        auto obj = Object(name, x, y, objectType, creationTime);
+        auto obj = new Object(name, x, y, objectType, creationTime);
         objs.push_back(obj);
     }
     return objs;
 }
 
-void writeToFile(std::map<std::wstring, std::vector<Object*>> &groups)
+void writeToFile(std::map<std::wstring, std::vector<Object*>> &groups, std::string &fileName)
 {
-    std::string fileName;
-    std::cout << "Input file name: ";
-    std::cin >> fileName;
     std::wofstream outFile("..\\resources\\" + fileName + ".txt");
 
     if (!outFile.is_open())
     {
-        std::cerr << "Unable to open the file: " << fileName << ".txt" << std::endl;
-        return;
+        throw FailedToOpenFileException();
     }
+
+    outFile.imbue(std::locale(outFile.getloc(), new std::codecvt_utf8<wchar_t, 0x10FFFF, std::consume_header>));
+
+    auto space = ConvertToWString(" ");
+    auto newline = ConvertToWString("\n");
+    auto groupWord = ConvertToWString("Группа: ");
 
     for (auto& group : groups)
     {
-        outFile << L"Группа: " << group.first << L"\n";
+        outFile << groupWord << group.first << newline;
         for (auto* obj : group.second)
         {
-            outFile << obj->getName() << L" ";
-            outFile << obj->getX() << L" ";
-            outFile << obj->getY() << L" ";
-            outFile << obj->getObjectType() << L" ";
-            outFile << obj->getCreationTime() << L"\n";
+            outFile << obj->getName() << space;
+            outFile << obj->getX() << space;
+            outFile << obj->getY() << space;
+            outFile << obj->getObjectType() << space;
+            outFile << obj->getCreationTime() << newline;
         }
-        outFile << L"\n";
+        outFile << newline;
     }
     outFile.close();
 }
