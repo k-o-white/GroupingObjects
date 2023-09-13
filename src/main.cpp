@@ -7,7 +7,17 @@ enum option {DISTANCE = 1, NAME, CREATION_TIME, OBJECT_TYPE};
 
 int main() 
 {
-    auto objects = getObjectList("..\\resources\\data.txt");
+    std::vector<Object> objects;
+    std::string path = "..\\resources\\data3.txt";
+    try
+    {
+        objects = getObjectList(path);
+    }
+    catch (const FailedToOpenFileException &fail)
+    {
+        std::cerr << fail.what() << path << std::endl;
+        return 1;
+    }
     std::map<std::wstring, std::vector<Object*>> result;
     int option;
     std::cout << "Choose option to group objects: ";

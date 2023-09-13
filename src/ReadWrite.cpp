@@ -4,6 +4,11 @@
 
 #include "ReadWrite.h"
 
+const char* FailedToOpenFileException::what() const noexcept
+{
+    return "Failed to open file: ";
+}
+
 std::wstring ConvertToWString(const std::string &source)
 {
     std::wstring wstr;
@@ -23,7 +28,7 @@ std::stringstream ReadFromFile(std::string path)
     std::ifstream f(path);
     if (!f.is_open())
     {
-        exit(1);
+        throw FailedToOpenFileException();
     }
     std::stringstream ss;
     ss << f.rdbuf();
@@ -33,7 +38,8 @@ std::stringstream ReadFromFile(std::string path)
 std::vector<Object> getObjectList(std::string filePath)
 {
     std::vector<Object> objs;
-    auto fileContent = ReadFromFile("..\\resources\\data.txt");
+    std::stringstream fileContent;
+    fileContent = ReadFromFile(filePath);
     std::string line;
     while (std::getline(fileContent, line))
     {
