@@ -6,9 +6,7 @@
 #include <algorithm>
 #include <fstream>
 
-double calculateDistance(const Object* obj1, const Object* obj2);
-
-bool compareByDistance(const Object* obj1, const Object* obj2);
+double distanceFromZero(const Object* obj);
 
 std::map<std::wstring, std::vector<Object*>> groupingByDistance(std::vector<Object*> &objects);
 

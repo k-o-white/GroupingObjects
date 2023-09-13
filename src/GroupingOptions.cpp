@@ -2,33 +2,21 @@
 #include <ReadWrite.h>
 #include <iostream>
 
-double calculateDistance(const Object* obj1, const Object* obj2)
+double distanceFromZero(const Object* obj)
 {
-    double dx = obj1->getX() - obj2->getX();
-    double dy = obj1->getY() - obj2->getY();
-    return std::sqrt(dx * dx + dy * dy);
-}
-
-bool compareByDistance(const Object* obj1, const Object* obj2)
-{
-    Object zPoint(L"НулеваяКоордината", 0.0, 0.0, L"Точка", 0);
-    auto distance1 = calculateDistance(obj1, &zPoint);
-    auto distance2 = calculateDistance(obj2, &zPoint);
-    return distance1 < distance2;
+    double dx = obj->getX();
+    double dy = obj->getY();
+    return std::sqrt(std::pow(dx, 2.0) + std::pow(dy, 2.0));
 }
 
 std::map<std::wstring, std::vector<Object*>> groupingByDistance(std::vector<Object*> &objects)
 {
     std::map<std::wstring, std::vector<Object*>> resultGroups;
 
-    auto* zeroPoint = new Object(ConvertToWString("НулеваяКоордината"),
-                                 0.0, 0.0, ConvertToWString("Точка"), 0);
-
-    setlocale(LC_ALL,"Russian");
     for (auto obj : objects)
     {
         std::string groupName;
-        double objDistance = calculateDistance(obj, zeroPoint);
+        double objDistance = distanceFromZero(obj);
         if (objDistance < 100.0)
             groupName = "До 100 ед.";
         else if (objDistance < 1000.0)
@@ -43,7 +31,12 @@ std::map<std::wstring, std::vector<Object*>> groupingByDistance(std::vector<Obje
 
     for (auto group : resultGroups)
     {
-        std::sort(group.second.begin(), group.second.end(), compareByDistance);
+        std::sort(group.second.begin(), group.second.end(), [](const Object* obj1, const Object* obj2)
+        {
+            auto distance1 = distanceFromZero(obj1);
+            auto distance2 = distanceFromZero(obj2);
+            return distance1 < distance2;
+        });
     }
 
     return resultGroups;
@@ -53,7 +46,6 @@ std::map<std::wstring, std::vector<Object*>> groupingByName(std::vector<Object*>
 {
     std::map<std::wstring, std::vector<Object*>> resultGroups;
 
-    setlocale( LC_ALL,"Russian" );
     auto isCyrillic = [](const wchar_t &symbol)
     {
         return symbol >= L'\u0410' && symbol <= L'\u044F';
