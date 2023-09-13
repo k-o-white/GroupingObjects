@@ -12,6 +12,6 @@
 #include <codecvt>
 #include "Object.h"
 
-std::vector<Object*> readFromFile(std::string filePath);
+std::vector<Object> readFromFile(std::string filePath);
 
 void writeToFile(std::map<std::wstring, std::vector<Object*>> &groups);
