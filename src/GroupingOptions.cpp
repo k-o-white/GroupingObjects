@@ -2,16 +2,16 @@
 #include <ReadWrite.h>
 #include <iostream>
 
-double distanceFromZero(const Object* obj)
-{
-    double dx = obj->getX();
-    double dy = obj->getY();
-    return std::sqrt(std::pow(dx, 2.0) + std::pow(dy, 2.0));
-}
-
 std::map<std::wstring, std::vector<Object*>> groupingByDistance(std::vector<Object*> &objects)
 {
     std::map<std::wstring, std::vector<Object*>> resultGroups;
+
+    auto distanceFromZero = [](const Object* obj)
+    {
+        double dx = obj->getX();
+        double dy = obj->getY();
+        return std::sqrt(std::pow(dx, 2.0) + std::pow(dy, 2.0));
+    };
 
     for (auto obj : objects)
     {
@@ -31,12 +31,13 @@ std::map<std::wstring, std::vector<Object*>> groupingByDistance(std::vector<Obje
 
     for (auto group : resultGroups)
     {
-        std::sort(group.second.begin(), group.second.end(), [](const Object* obj1, const Object* obj2)
+        auto name = group.first;
+        auto gr = group.second;
+        std::sort(gr.begin(), gr.end(), [distanceFromZero](const Object* obj1, const Object* obj2)
         {
-            auto distance1 = distanceFromZero(obj1);
-            auto distance2 = distanceFromZero(obj2);
-            return distance1 < distance2;
+            return distanceFromZero(obj1) < distanceFromZero(obj2);
         });
+        resultGroups[name] = gr;
     }
 
     return resultGroups;
@@ -66,10 +67,13 @@ std::map<std::wstring, std::vector<Object*>> groupingByName(std::vector<Object*>
 
     for (auto group : resultGroups)
     {
-        std::sort(group.second.begin(), group.second.end(), [](const Object* obj1, const Object* obj2)
+        auto name = group.first;
+        auto gr = group.second;
+        std::sort(gr.begin(), gr.end(), [](const Object* obj1, const Object* obj2)
         {
             return obj1->getName() < obj2->getName();
         });
+        resultGroups[name] = gr;
     }
 
     return resultGroups;
@@ -105,10 +109,13 @@ std::map<std::wstring, std::vector<Object*>> groupingByCreationTime(std::vector<
 
     for (auto group : resultGroups)
     {
-        std::sort(group.second.begin(), group.second.end(), [](const Object* obj1, const Object* obj2)
+        auto name = group.first;
+        auto gr = group.second;
+        std::sort(gr.begin(), gr.end(), [](const Object* obj1, const Object* obj2)
         {
             return obj1->getCreationTime() < obj2->getCreationTime();
         });
+        resultGroups[name] = gr;
     }
 
     return resultGroups;
@@ -148,10 +155,13 @@ std::map<std::wstring, std::vector<Object*>> groupingByObjectType(std::vector<Ob
 
     for (auto group : resultGroups)
     {
-        std::sort(group.second.begin(), group.second.end(), [](const Object* obj1, const Object* obj2)
+        auto name = group.first;
+        auto gr = group.second;
+        std::sort(gr.begin(), gr.end(), [](const Object* obj1, const Object* obj2)
         {
             return obj1->getName() < obj2->getName();
         });
+        resultGroups[name] = gr;
     }
 
     return resultGroups;
