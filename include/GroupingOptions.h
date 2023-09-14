@@ -6,8 +6,6 @@
 #include <algorithm>
 #include <fstream>
 
-double distanceFromZero(const Object* obj);
-
 std::map<std::wstring, std::vector<Object*>> groupingByDistance(std::vector<Object*> &objects);
 
 std::map<std::wstring, std::vector<Object*>> groupingByName(std::vector<Object*> &objects);
